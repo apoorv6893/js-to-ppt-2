@@ -2,81 +2,52 @@ const form = document.getElementById("uploadForm");
 const statusDiv = document.getElementById("status");
 
 form.addEventListener("submit", async (e) => {
+
     e.preventDefault();
 
-    statusDiv.textContent = "Generating PowerPoint...";
+    statusDiv.innerHTML = "Generating PowerPoint...";
 
-    const uploadedFile = document.getElementById("script").files[0];
-    const pastedCode = document.getElementById("code").value.trim();
-    const filename = document.getElementById("filename").value.trim() || "presentation";
+    const file = document.getElementById("script").files[0];
 
-    let file;
-
-    if (pastedCode.length > 0) {
-        file = new File(
-            [pastedCode],
-            "script.js",
-            {
-                type: "application/javascript"
-            }
-        );
-    } else if (uploadedFile) {
-        file = uploadedFile;
-    } else {
-        statusDiv.textContent =
-            "Please either upload a JavaScript file or paste JavaScript code.";
+    if (!file) {
+        statusDiv.innerHTML = "Please choose a JavaScript file.";
         return;
     }
 
     const data = new FormData();
 
     data.append("script", file);
-    data.append("filename", filename);
 
-    try {
+    const response = await fetch("/generate", {
+        method: "POST",
+        body: data
+    });
 
-        const response = await fetch("/generate", {
-            method: "POST",
-            body: data
-        });
+    if (!response.ok) {
 
-        if (!response.ok) {
+        const err = await response.json();
 
-            let errorMessage = "PowerPoint generation failed.";
+        statusDiv.innerHTML = err.error;
 
-            try {
-                const err = await response.json();
-                errorMessage = err.error || errorMessage;
-            } catch (_) {}
-
-            statusDiv.textContent = errorMessage;
-            return;
-        }
-
-        const blob = await response.blob();
-
-        const url = window.URL.createObjectURL(blob);
-
-        const link = document.createElement("a");
-
-        link.href = url;
-        link.download = `${filename}.pptx`;
-
-        document.body.appendChild(link);
-
-        link.click();
-
-        link.remove();
-
-        window.URL.revokeObjectURL(url);
-
-        statusDiv.textContent = "PowerPoint generated successfully.";
-
-    } catch (err) {
-
-        statusDiv.textContent =
-            "Unexpected error:\n\n" + err.message;
-
+        return;
     }
 
+    const blob = await response.blob();
+
+    const url = window.URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+
+    a.href = url;
+    a.download = "presentation.pptx";
+
+    document.body.appendChild(a);
+
+    a.click();
+
+    a.remove();
+
+    window.URL.revokeObjectURL(url);
+
+    statusDiv.innerHTML = "PowerPoint generated successfully.";
 });
