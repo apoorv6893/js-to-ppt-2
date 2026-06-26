@@ -1,0 +1,14 @@
+{
+  "name": "js-to-ppt",
+  "version": "1.0.0",
+  "description": "Convert PptxGenJS scripts to PowerPoint",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "multer": "^1.4.5-lts.1",
+    "pptxgenjs": "^3.12.0"
+  }
+}
