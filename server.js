@@ -43,7 +43,9 @@ app.post("/generate", upload.single("script"), async (req, res) => {
   execFile(
     "node",
     [
-      inputFile
+      path.join(__dirname, "generator.js"),
+      inputFile,
+      outputFile
     ],
     {
       cwd: jobDir
