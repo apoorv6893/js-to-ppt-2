@@ -2,32 +2,74 @@ const fs = require("fs");
 const PptxGenJS = require("pptxgenjs");
 
 async function run() {
+
     const inputFile = process.argv[2];
     const outputFile = process.argv[3];
 
     if (!inputFile || !outputFile) {
-        throw new Error("Usage: node generator.js <input.js> <output.pptx>");
+        throw new Error(
+            "Usage: node generator.js <input.js> <output.pptx>"
+        );
     }
 
     let code = fs.readFileSync(inputFile, "utf8");
 
-    // Remove standalone bootstrap
+    // -------------------------------------------------------
+    // Remove CommonJS import
+    // -------------------------------------------------------
+
     code = code.replace(
-        /const\s+pptxgen\s*=\s*require\s*\(\s*['"]pptxgenjs['"]\s*\)\s*;?/g,
+        /(?:const|let|var)\s+\w+\s*=\s*require\s*\(\s*['"]pptxgenjs['"]\s*\)\s*;?/gi,
         ""
     );
 
-    code = code.replace(
-        /const\s+pres\s*=\s*new\s+pptxgen\s*\(\s*\)\s*;?/g,
-        "const pres = pptx;"
-    );
+    // -------------------------------------------------------
+    // Remove ES Module import
+    // -------------------------------------------------------
 
     code = code.replace(
-        /pres\.writeFile\s*\([\s\S]*$/m,
+        /import\s+.*?\s+from\s+['"]pptxgenjs['"]\s*;?/gi,
         ""
     );
 
-    const wrappedCode = `
+    // -------------------------------------------------------
+    // Detect presentation variable
+    // -------------------------------------------------------
+
+    const creationRegex =
+        /(?:const|let|var)\s+([A-Za-z_$][A-Za-z0-9_$]*)\s*=\s*new\s+[A-Za-z_$][A-Za-z0-9_$]*\s*\(\s*\)\s*;?/;
+
+    const match = code.match(creationRegex);
+
+    let presentationVariable = "pres";
+
+    if (match) {
+
+        presentationVariable = match[1];
+
+        code = code.replace(
+            creationRegex,
+            `const ${presentationVariable} = pptx;`
+        );
+    }
+
+    // -------------------------------------------------------
+    // Remove any writeFile(...)
+    // -------------------------------------------------------
+
+    const writeRegex =
+        new RegExp(
+            `${presentationVariable}\\.writeFile\\([\\s\\S]*?\\);?`,
+            "g"
+        );
+
+    code = code.replace(writeRegex, "");
+
+    // -------------------------------------------------------
+    // Execute
+    // -------------------------------------------------------
+
+    const wrapped = `
 const pptx = new PptxGenJS();
 
 ${code}
@@ -40,15 +82,19 @@ await pptx.writeFile({
     const AsyncFunction =
         Object.getPrototypeOf(async function () {}).constructor;
 
-    const fn = new AsyncFunction(
-        "PptxGenJS",
-        wrappedCode
-    );
+    const fn =
+        new AsyncFunction(
+            "PptxGenJS",
+            wrapped
+        );
 
     await fn(PptxGenJS);
+
 }
 
-run().catch((err) => {
-    console.error(err);
-    process.exit(1);
-});
+run()
+    .then(() => process.exit(0))
+    .catch(err => {
+        console.error(err);
+        process.exit(1);
+    });
