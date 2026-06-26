@@ -1,42 +1,68 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JS → PPT Converter</title>
+    <title>JavaScript → PowerPoint Converter</title>
 
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
-<div class="container">
+    <div class="container">
 
-    <h1>JavaScript → PowerPoint Converter</h1>
+        <h1>JavaScript → PowerPoint Converter</h1>
 
-    <form id="uploadForm">
+        <form id="uploadForm">
 
-        <input
-            type="file"
-            id="script"
-            accept=".js"
-            required
-        >
+            <label><strong>Upload JavaScript (.js)</strong></label>
 
-        <br><br>
+            <input
+                type="file"
+                id="script"
+                accept=".js">
 
-        <button type="submit">
-            Generate PPT
-        </button>
+            <p style="text-align:center;margin:20px 0;font-weight:bold;">
+                OR
+            </p>
 
-    </form>
+            <label><strong>Paste JavaScript</strong></label>
 
-    <br>
+            <textarea
+                id="code"
+                rows="20"
+                placeholder="Paste your PptxGenJS code here..."></textarea>
 
-    <div id="status"></div>
+            <br><br>
 
-</div>
+            <label><strong>Output filename</strong></label>
 
-<script src="app.js"></script>
+            <input
+                id="filename"
+                type="text"
+                value="presentation"
+                placeholder="presentation">
+
+            <br><br>
+
+            <button type="submit">
+                🚀 Generate PPT
+            </button>
+
+        </form>
+
+        <hr>
+
+        <h3>Status</h3>
+
+        <div id="status"></div>
+
+    </div>
+
+    <script src="app.js"></script>
 
 </body>
+
 </html>
