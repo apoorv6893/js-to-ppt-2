@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JS → PPT Converter</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="container">
+
+    <h1>JavaScript → PowerPoint Converter</h1>
+
+    <form id="uploadForm">
+
+        <input
+            type="file"
+            id="script"
+            accept=".js"
+            required
+        >
+
+        <br><br>
+
+        <button type="submit">
+            Generate PPT
+        </button>
+
+    </form>
+
+    <br>
+
+    <div id="status"></div>
+
+</div>
+
+<script src="app.js"></script>
+
+</body>
+</html>
